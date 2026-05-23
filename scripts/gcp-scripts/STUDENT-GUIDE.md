@@ -68,7 +68,7 @@ ls ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
 ```bash
 cd ~
 git clone https://github.com/matysiaq/prin-2026-observability.git
-cd prin-2026-observability/gcp-scripts
+cd prin-2026-observability/scripts/gcp-scripts
 ```
 
 ---
@@ -134,7 +134,7 @@ When the script finishes, you will see:
 Point `kubectl` at the new cluster:
 
 ```bash
-export KUBECONFIG=~/prin-2026-observability/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config
+export KUBECONFIG=~/prin-2026-observability/scripts/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config
 ```
 
 Check that the node is `Ready`:
@@ -159,7 +159,7 @@ k8s-workshop-worker-2   Ready    <none>          4m    v1.30.0
 So you don't have to re-export KUBECONFIG each time you open Cloud Shell:
 
 ```bash
-echo 'export KUBECONFIG=~/prin-2026-observability/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config' >> ~/.bashrc
+echo 'export KUBECONFIG=~/prin-2026-observability/scripts/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -172,7 +172,7 @@ If you want to use `kubectl` from your own laptop instead of Cloud Shell, you ne
 **In Cloud Shell**, print the kubeconfig content:
 
 ```bash
-cat ~/prin-2026-observability/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config
+cat ~/prin-2026-observability/scripts/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config
 ```
 
 **On your local machine**, create the file and paste the content:
@@ -225,7 +225,7 @@ gcloud compute instances start k8s-workshop-master k8s-workshop-worker-1 k8s-wor
 To delete all resources and stop any charges:
 
 ```bash
-cd ~/prin-2026-observability/gcp-scripts/terraform
+cd ~/prin-2026-observability/scripts/gcp-scripts/terraform
 terraform destroy -auto-approve
 ```
 

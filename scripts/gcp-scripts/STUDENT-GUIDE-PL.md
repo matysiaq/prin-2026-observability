@@ -67,7 +67,7 @@ ls ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
 ```bash
 cd ~
 git clone https://github.com/matysiaq/prin-2026-observability.git
-cd prin-2026-observability/gcp-scripts
+cd prin-2026-observability/scripts/gcp-scripts
 ```
 
 ---
@@ -133,7 +133,7 @@ Po zakończeniu skryptu zobaczysz komunikat:
 Wskaż `kubectl` na nowy klaster:
 
 ```bash
-export KUBECONFIG=~/prin-2026-observability/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config
+export KUBECONFIG=~/prin-2026-observability/scripts/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config
 ```
 
 Sprawdź, czy węzeł ma status `Ready`:
@@ -158,7 +158,7 @@ k8s-workshop-worker-2   Ready    <none>          4m    v1.30.0
 Dzięki temu nie będziesz musiał ponownie ustawiać KUBECONFIG przy każdym otwarciu Cloud Shell:
 
 ```bash
-echo 'export KUBECONFIG=~/prin-2026-observability/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config' >> ~/.bashrc
+echo 'export KUBECONFIG=~/prin-2026-observability/scripts/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -171,7 +171,7 @@ Jeśli chcesz używać `kubectl` z własnego laptopa zamiast Cloud Shell, musisz
 **W Cloud Shell** wyświetl zawartość pliku kubeconfig:
 
 ```bash
-cat ~/prin-2026-observability/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config
+cat ~/prin-2026-observability/scripts/gcp-scripts/ansible/kubeconfigs/k8s-workshop.config
 ```
 
 **Na swoim komputerze** utwórz plik i wklej zawartość:
@@ -224,7 +224,7 @@ gcloud compute instances start k8s-workshop-master k8s-workshop-worker-1 k8s-wor
 Aby usunąć wszystkie zasoby i zatrzymać naliczanie opłat:
 
 ```bash
-cd ~/prin-2026-observability/gcp-scripts/terraform
+cd ~/prin-2026-observability/scripts/gcp-scripts/terraform
 terraform destroy -auto-approve
 ```
 
