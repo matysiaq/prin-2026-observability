@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: boutique-otel-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack    # required for prometheus-operator to pick this up
+spec:
+  groups:
+    - name: span-metrics
+      interval: 30s
+      rules:
+        - alert: HighSpanLatency
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(traces_spanmetrics_latency_bucket{
+                service="recommendationservice"
+              }[2m])) by (le)
+            ) > 0.05
+          for: 30s
+          labels:
+            severity: warning
+            namespace: monitoring
+          annotations:
+            summary: "High P99 latency on {{ $labels.service }}"
+            description: "P99 latency is {{ $value | humanizeDuration }}"

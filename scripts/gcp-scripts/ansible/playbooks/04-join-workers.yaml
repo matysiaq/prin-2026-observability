@@ -1,0 +1,41 @@
+---
+# Generates a kubeadm join token on the master and joins all workers.
+- hosts: masters
+  become: yes
+  tasks:
+    - name: Generate kubeadm join command
+      command: kubeadm token create --print-join-command
+      register: join_command
+
+    - name: Save join command locally
+      copy:
+        content: "{{ join_command.stdout }}"
+        dest: "{{ playbook_dir }}/../../join-command.sh"
+        mode: '0600'
+      delegate_to: localhost
+      become: no
+
+- hosts: workers
+  become: yes
+  tasks:
+    - name: Copy join command to worker
+      copy:
+        src: "{{ playbook_dir }}/../../join-command.sh"
+        dest: /tmp/join-command.sh
+        mode: '0700'
+
+    - name: Join the cluster
+      command: bash /tmp/join-command.sh
+
+    - name: Remove join command from worker
+      file:
+        path: /tmp/join-command.sh
+        state: absent
+
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Remove local join command file
+      file:
+        path: "{{ playbook_dir }}/../../join-command.sh"
+        state: absent

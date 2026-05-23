@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: boutique-alerts
+  namespace: monitoring
+spec:
+  route:
+    receiver: boutique-webhook
+    matchers:
+      - name: alertname
+        matchType: "="
+        value: HighSpanLatency
+  receivers:
+    - name: boutique-webhook
+      webhookConfigs:
+        - url: 'http://webhook-receiver.monitoring.svc:8080'
+          sendResolved: true

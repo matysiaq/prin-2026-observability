@@ -1,0 +1,12 @@
+# Terraform state and secrets
+.terraform/
+.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+
+# Generated Ansible files (contain IP addresses and key paths)
+ansible/inventory
+ansible/group_vars/
+ansible/kubeconfigs/
+join-command.sh

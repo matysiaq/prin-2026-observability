@@ -1,0 +1,30 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Workshop Cluster Configuration — fill in the value marked with TODO,
+# then run:  ./deploy.sh
+# ──────────────────────────────────────────────────────────────────────────────
+
+cluster:
+  name: k8s-workshop        # used as a prefix for all GCP resource names
+
+kubernetes:
+  version: "1.30.0"
+  pod_cidr: "10.244.0.0/16"
+  service_cidr: "10.96.0.0/12"
+
+cni:
+  type: cilium
+  version: "1.15.6"
+
+gcp:
+  project: "TODO: your-project-id"       # e.g. my-project-123456
+  region: "europe-central2"              # Warsaw — closest to Poland
+  zone: "europe-central2-a"
+  master_machine_type: "e2-standard-2"   # 2 vCPU, 8 GB RAM — control plane
+  worker_machine_type: "e2-standard-2"   # 2 vCPU, 8 GB RAM — per worker
+  worker_count: 2
+  disk_size_gb: 50
+
+ssh:
+  public_key_path: "~/.ssh/id_rsa.pub"
+  private_key_path: "~/.ssh/id_rsa"
+  user: "student"

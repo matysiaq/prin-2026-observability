@@ -1,0 +1,33 @@
+---
+# Creates the k8s OS user and runs apt update.
+# Ubuntu 22.04 LTS on GCP already has cgroups v2 enabled by default —
+# no kernel upgrade or GRUB changes required.
+- hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Create the '{{ k8s_user }}' user
+      user:
+        name: "{{ k8s_user }}"
+        append: yes
+        state: present
+        createhome: yes
+        shell: /bin/bash
+
+    - name: Allow '{{ k8s_user }}' passwordless sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%sudo'
+        line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Add '{{ k8s_user }}' to the sudo group
+      user:
+        name: "{{ k8s_user }}"
+        groups: sudo
+        append: yes

@@ -1,0 +1,112 @@
+---
+# Initialises the Kubernetes control plane on the master node,
+# then installs Helm and the Cilium CNI.
+- hosts: masters
+  become: yes
+  tasks:
+    - name: Check if Kubernetes is already initialised
+      stat:
+        path: /etc/kubernetes/admin.conf
+      register: k8s_init
+
+    - name: Initialise Kubernetes cluster
+      command: >
+        kubeadm init
+        --pod-network-cidr={{ pod_cidr }}
+        --service-cidr={{ service_cidr }}
+        --control-plane-endpoint={{ master_ip }}
+        --apiserver-advertise-address={{ ansible_default_ipv4.address }}
+        --apiserver-cert-extra-sans={{ master_ip }},{{ ansible_default_ipv4.address }}
+      when: not k8s_init.stat.exists
+
+    - name: Create .kube directory for {{ k8s_user }}
+      file:
+        path: "/home/{{ k8s_user }}/.kube"
+        state: directory
+        owner: "{{ k8s_user }}"
+        group: "{{ k8s_user }}"
+        mode: '0755'
+
+    - name: Copy admin.conf to user kubeconfig
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: "/home/{{ k8s_user }}/.kube/config"
+        owner: "{{ k8s_user }}"
+        group: "{{ k8s_user }}"
+        mode: '0644'
+        remote_src: yes
+
+    # ── Helm ──────────────────────────────────────────────────────────────────
+
+    - name: Check if Helm is already installed
+      stat:
+        path: /usr/local/bin/helm
+      register: helm_bin
+
+    - name: Download Helm {{ helm_version }}
+      get_url:
+        url: "https://get.helm.sh/helm-v{{ helm_version }}-linux-amd64.tar.gz"
+        dest: "/tmp/helm-v{{ helm_version }}-linux-amd64.tar.gz"
+      when: not helm_bin.stat.exists
+
+    - name: Extract Helm archive
+      unarchive:
+        src: "/tmp/helm-v{{ helm_version }}-linux-amd64.tar.gz"
+        dest: /tmp
+        remote_src: yes
+      when: not helm_bin.stat.exists
+
+    - name: Install Helm binary
+      copy:
+        src: /tmp/linux-amd64/helm
+        dest: /usr/local/bin/helm
+        mode: '0755'
+        remote_src: yes
+      when: not helm_bin.stat.exists
+
+    # ── Cilium CNI ────────────────────────────────────────────────────────────
+
+    - name: Add Cilium Helm repo
+      become_user: "{{ k8s_user }}"
+      environment:
+        KUBECONFIG: "/home/{{ k8s_user }}/.kube/config"
+      command: helm repo add cilium https://helm.cilium.io/
+      register: helm_repo_add
+      changed_when: "'already exists' not in helm_repo_add.stdout"
+
+    - name: Update Helm repos
+      become_user: "{{ k8s_user }}"
+      environment:
+        KUBECONFIG: "/home/{{ k8s_user }}/.kube/config"
+      command: helm repo update
+
+    - name: Check Cilium Helm release status
+      become_user: "{{ k8s_user }}"
+      environment:
+        KUBECONFIG: "/home/{{ k8s_user }}/.kube/config"
+      shell: helm status cilium --namespace kube-system 2>&1 | grep "^STATUS:" | awk '{print $2}'
+      register: cilium_helm_status
+      failed_when: false
+      changed_when: false
+
+    - name: Remove stuck or failed Cilium Helm release
+      become_user: "{{ k8s_user }}"
+      environment:
+        KUBECONFIG: "/home/{{ k8s_user }}/.kube/config"
+      command: helm uninstall cilium --namespace kube-system
+      when: cilium_helm_status.stdout in ['pending-install', 'pending-upgrade', 'failed']
+
+    - name: Install Cilium {{ cilium_helm_version }}
+      become_user: "{{ k8s_user }}"
+      environment:
+        KUBECONFIG: "/home/{{ k8s_user }}/.kube/config"
+      command: >
+        helm upgrade --install cilium cilium/cilium
+        --namespace kube-system
+        --version {{ cilium_helm_version }}
+        --set operator.replicas=1
+        --set tunnel=vxlan
+        --set ipam.mode=kubernetes
+        --wait
+        --timeout 5m
+      when: cilium_helm_status.stdout != 'deployed'

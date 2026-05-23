@@ -1,0 +1,16 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: recommendation-cpu-stress
+  namespace: boutique
+spec:
+  mode: all
+  selector:
+    namespaces:
+      - boutique
+    labelSelectors:
+      app: recommendationservice
+  stressors:
+    cpu:
+      workers: 1
+  duration: "10m"
