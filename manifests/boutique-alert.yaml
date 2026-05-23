@@ -15,7 +15,7 @@ spec:
             histogram_quantile(0.99,
               sum(rate(traces_spanmetrics_latency_bucket{
                 service="recommendationservice"
-              }[2m])) by (le)
+              }[2m])) by (le, service)
             ) > 0.05
           for: 30s
           labels:

@@ -530,7 +530,7 @@ kubectl explain podchaos.spec.mode
 
 ### 6.4 Uruchom eksperyment pod-failure
 
-Poniższy manifest definiuje eksperyment `PodChaos`, który zabija pod `recommendationservice` co 30 sekund przez 5 minut.
+Poniższy manifest definiuje eksperyment `PodChaos`, który zabija pod `recommendationservice` co 60 sekund i działa do momentu ręcznego usunięcia Schedule.
 
 > **YAML vs UI:** Dashboard Chaos Mesh i podejście z `kubectl apply` dają identyczne rezultaty — oba tworzą obiekt `PodChaos` w Kubernetes. Podejście z manifestem jest powtarzalne i można je commitować do gita. UI jest przydatne do eksploracji.
 
